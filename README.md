@@ -35,7 +35,7 @@ A concurrent GitHub organization scanner that:
 
 1. **Clone this repo:**
    ```bash
-   git clone https://github.com/jeanhaley/go-threat-scanner.git
+   git clone https://github.com/jeanhaley32/go-threat-scanner.git
    cd go-threat-scanner
    ```
 
