@@ -1,0 +1,67 @@
+{
+  "description": "Expected findings when scanning sample lock files with test-threat.conf",
+  "usage": "Compare your scanner output against these expected results to verify correctness",
+
+  "npm_findings": [
+    {
+      "package": "evil-package",
+      "version": "1.0.0",
+      "severity": "CRITICAL",
+      "reason": "Package name in THREAT_PACKAGES list",
+      "file": "sample-package-lock.json"
+    },
+    {
+      "package": "event-stream",
+      "version": "3.3.6",
+      "severity": "CRITICAL",
+      "reason": "Package@version in THREAT_PACKAGE_VERSIONS list",
+      "file": "sample-package-lock.json"
+    },
+    {
+      "package": "flatmap-stream",
+      "version": "0.1.1",
+      "severity": "CRITICAL",
+      "reason": "Package@version in THREAT_PACKAGE_VERSIONS list",
+      "file": "sample-package-lock.json"
+    }
+  ],
+
+  "yarn_findings": [
+    {
+      "package": "@malicious/crypto-stealer",
+      "version": "1.0.0",
+      "severity": "CRITICAL",
+      "reason": "Package name in THREAT_PACKAGES list",
+      "file": "sample-yarn.lock"
+    },
+    {
+      "package": "typosquat-lodash",
+      "version": "1.0.0",
+      "severity": "CRITICAL",
+      "reason": "Package name in THREAT_PACKAGES list",
+      "file": "sample-yarn.lock"
+    },
+    {
+      "package": "event-stream",
+      "version": "3.3.6",
+      "severity": "CRITICAL",
+      "reason": "Package@version in THREAT_PACKAGE_VERSIONS list",
+      "file": "sample-yarn.lock"
+    },
+    {
+      "package": "flatmap-stream",
+      "version": "0.1.1",
+      "severity": "CRITICAL",
+      "reason": "Package@version in THREAT_PACKAGE_VERSIONS list",
+      "file": "sample-yarn.lock"
+    }
+  ],
+
+  "total_unique_threats": 5,
+  "notes": [
+    "lodash and express are NOT threats - they are legitimate packages",
+    "event-stream 3.3.6 was a real supply chain attack in 2018",
+    "flatmap-stream 0.1.1 was the actual malware injected into event-stream",
+    "The other packages are fake examples for learning purposes"
+  ]
+}

@@ -1,0 +1,43 @@
+# Go Threat Scanner - Learning Progress Tracker
+# Updated by tutor at end of each session
+
+current_phase: 0
+started_at: null
+last_session: null
+
+phase_status:
+  phase_0: not_started    # Environment Setup
+  phase_0_5: not_started  # Bash Script Walkthrough
+  phase_1: not_started    # Foundation & CLI
+  phase_2: not_started    # GitHub API Client
+  phase_3: not_started    # Lock File Parsing
+  phase_4a: not_started   # Goroutines & Channels Theory
+  phase_4b: not_started   # Worker Pool Implementation
+  phase_5: not_started    # Graceful Shutdown & Polish
+
+# Track struggles for final review
+struggles: []
+  # Example entry:
+  # - topic: "channel blocking"
+  #   phase: "4a"
+  #   symptom: "Program hung on unbuffered channel send"
+  #   resolution: "Understood that unbuffered channels block until receiver ready"
+  #   date: "2025-01-15"
+
+# Phase completion notes
+phase_notes:
+  phase_0: null
+  phase_0_5: null
+  phase_1: null
+  phase_2: null
+  phase_3: null
+  phase_4a: null
+  phase_4b: null
+  phase_5: null
+
+# Final review results (populated after Phase 5)
+final_review:
+  interview_score: null  # out of 10
+  strengths: []
+  areas_for_improvement: []
+  overall_readiness: null  # ready / almost ready / needs more work

@@ -1,0 +1,224 @@
+#!/bin/bash
+#===============================================================================
+# Threat Intelligence Configuration Template
+#===============================================================================
+#
+# This template defines the format for supply chain attack detection configs.
+# Each attack campaign should have its own .conf file with relevant IoCs.
+#
+# USAGE:
+#   1. Copy this template to a new file (e.g., new-attack-2025.conf)
+#   2. Research the attack and fill in the IoCs (see AI RESEARCH PROMPT below)
+#   3. Set THREAT_ENABLED=true
+#   4. Run: ./gh-threat-scanner.sh --org YOUR_ORG --config ./new-attack-2025.conf
+#
+# EXISTING CONFIGS:
+#   - shai-hulud.conf : Shai-Hulud npm supply chain attack (November 2025)
+#
+#===============================================================================
+# AI RESEARCH PROMPT
+#===============================================================================
+#
+# Use the following prompt with an AI assistant to research a new vulnerability
+# and generate the IoCs for this config file:
+#
+# ---BEGIN PROMPT---
+#
+# I need to create a threat detection config for a supply chain attack.
+#
+# Attack Name: [INSERT ATTACK NAME OR CVE]
+#
+# Please research this attack and provide the following information in a format
+# I can copy directly into a bash config file:
+#
+# 1. THREAT METADATA
+#    - Official name of the attack/campaign
+#    - Date discovered (YYYY-MM-DD)
+#    - Severity (CRITICAL for active exploits, WARNING for potential risks)
+#    - Source URLs for the security advisories
+#
+# 2. REPOSITORY INDICATORS (if applicable)
+#    - Suspicious patterns in repo descriptions
+#    - GitHub search terms that find related malicious repos
+#    - Branch name patterns used by attackers
+#    - Suffixes indicating hijacked/migrated repos
+#
+# 3. GITHUB ACTIONS INDICATORS (if applicable)
+#    - Names of malicious workflow files
+#    - Suspicious patterns in workflow content (base64, curl, webhooks, etc.)
+#    - Self-hosted runner name patterns
+#
+# 4. NPM PACKAGE INDICATORS
+#    - List of ALL known compromised package names
+#    - Specific compromised versions (package@version format)
+#    - Malicious SHA256 hashes from package-lock.json
+#    - Malicious script filenames referenced in package.json
+#    - Suspicious preinstall script patterns
+#
+# 5. EXFILTRATION INDICATORS
+#    - File paths/names used for credential theft
+#    - Data exfiltration patterns
+#
+# Format each section as space-separated values that can be assigned to a bash
+# variable. For example:
+#   THREAT_PACKAGES="pkg1 pkg2 @scope/pkg3"
+#   THREAT_PACKAGE_VERSIONS="pkg1@1.0.0 pkg2@2.0.0"
+#
+# Include sources/references for each piece of threat intelligence.
+#
+# ---END PROMPT---
+#
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# REQUIRED: Threat Metadata
+#-------------------------------------------------------------------------------
+# These fields identify the attack and control scanner behavior.
+#
+# THREAT_ENABLED   : Set to 'true' to activate scanning with this config
+# THREAT_NAME      : Human-readable name shown in scan output and reports
+# THREAT_DATE      : Date the attack was discovered/disclosed (for reference)
+# THREAT_SEVERITY  : Default severity for findings from this config
+#                    - CRITICAL: Active exploit, immediate action required
+#                    - WARNING: Potential risk, investigation recommended
+#                    - INFO: Informational, no immediate action needed
+
+THREAT_ENABLED=false
+THREAT_NAME="Template Attack"
+THREAT_DATE="YYYY-MM-DD"
+THREAT_SEVERITY="CRITICAL"
+
+# Source references (for documentation, not used by scanner)
+# THREAT_SOURCES="https://example.com/advisory https://cve.mitre.org/..."
+
+#-------------------------------------------------------------------------------
+# OPTIONAL: Repository Indicators
+#-------------------------------------------------------------------------------
+# Patterns to detect suspicious repositories in your GitHub organization.
+#
+# THREAT_REPO_PATTERNS   : Grep patterns to match in repository descriptions
+#                          Example: "backdoor malware cryptominer"
+#
+# THREAT_REPO_SEARCH     : GitHub search terms to find related malicious repos
+#                          Used with 'gh search repos' to discover threats
+#                          Example: "malware-campaign evil-package"
+#
+# THREAT_MIGRATION_SUFFIX: Suffix indicating a repo was force-migrated/hijacked
+#                          Attackers sometimes rename original repos with suffix
+#                          Example: "-archived" "-old" "-backup"
+
+THREAT_REPO_PATTERNS=""
+THREAT_REPO_SEARCH=""
+THREAT_MIGRATION_SUFFIX=""
+
+#-------------------------------------------------------------------------------
+# OPTIONAL: Branch Indicators
+#-------------------------------------------------------------------------------
+# Suspicious branch name patterns that may indicate compromise.
+#
+# THREAT_BRANCH_PATTERNS : Grep patterns to match suspicious branch names
+#                          Example: "exploit payload backdoor"
+
+THREAT_BRANCH_PATTERNS=""
+
+#-------------------------------------------------------------------------------
+# OPTIONAL: GitHub Actions Indicators
+#-------------------------------------------------------------------------------
+# Patterns for detecting malicious GitHub Actions workflows.
+#
+# THREAT_MALICIOUS_WORKFLOWS : Exact workflow filenames known to be malicious
+#                              Example: "ci.yml build.yml deploy.yml"
+#
+# THREAT_WORKFLOW_PATTERNS   : Content patterns to grep for inside workflows
+#                              Look for: base64 decoding, curl/wget to external
+#                              sites, eval, secrets exfiltration, etc.
+#                              Example: "base64 -d|curl.*webhook|eval"
+#
+# THREAT_RUNNER_PATTERNS     : Self-hosted runner name patterns
+#                              Attackers may register malicious runners
+#                              Example: "miner crypto SHA1HULUD"
+
+THREAT_MALICIOUS_WORKFLOWS=""
+THREAT_WORKFLOW_PATTERNS=""
+THREAT_RUNNER_PATTERNS=""
+
+#-------------------------------------------------------------------------------
+# OPTIONAL: Package Indicators (npm/yarn)
+#-------------------------------------------------------------------------------
+# For detecting compromised npm packages in your dependencies.
+#
+# THREAT_PACKAGES         : Package names that are known compromised
+#                           These are flagged if found in dependencies
+#                           Example: "@evil/pkg malicious-lib typosquat-lodash"
+#
+# THREAT_PACKAGE_VERSIONS : Specific compromised package@version pairs
+#                           Finding these exact versions is CRITICAL severity
+#                           Example: "lodash@4.17.21-malicious chalk@5.6.1"
+#
+# THREAT_HASHES           : Malicious SHA256 integrity hashes
+#                           Found in package-lock.json 'integrity' fields
+#                           Example: "sha256-abc123... sha256-def456..."
+#
+# THREAT_MALICIOUS_SCRIPTS: Payload filenames referenced in package.json scripts
+#                           Example: "setup.js payload.js backdoor.js"
+#
+# THREAT_PREINSTALL_PATTERNS: Suspicious patterns in preinstall/postinstall
+#                             Example: "curl.*http wget.*http node -e eval"
+
+THREAT_PACKAGES=""
+THREAT_PACKAGE_VERSIONS=""
+THREAT_HASHES=""
+THREAT_MALICIOUS_SCRIPTS=""
+THREAT_PREINSTALL_PATTERNS=""
+
+#-------------------------------------------------------------------------------
+# OPTIONAL: Exfiltration Indicators
+#-------------------------------------------------------------------------------
+# Files that indicate credential theft or data exfiltration attempts.
+#
+# THREAT_EXFIL_FILES : File paths to check for in repositories
+#                      These are typically created by malware to store stolen
+#                      credentials, secrets, or environment variables
+#                      Example: ".env.stolen secrets.json credentials.txt"
+
+THREAT_EXFIL_FILES=""
+
+#-------------------------------------------------------------------------------
+# OPTIONAL: Custom Watchlist
+#-------------------------------------------------------------------------------
+# Additional packages to monitor that aren't part of this specific threat.
+# Useful for: policy enforcement, license compliance, vendor tracking.
+#
+# CUSTOM_WATCHLIST_ENABLED  : Set to 'true' to enable watchlist checking
+# CUSTOM_WATCHLIST_PACKAGES : Package names to flag (WARNING severity)
+#                             Example: "moment lodash request"
+
+CUSTOM_WATCHLIST_ENABLED=false
+CUSTOM_WATCHLIST_PACKAGES=""
+
+#===============================================================================
+# EXAMPLE: Filled-out config for reference
+#===============================================================================
+#
+# Here's an abbreviated example of what a completed config looks like:
+#
+# THREAT_ENABLED=true
+# THREAT_NAME="Example Supply Chain Attack"
+# THREAT_DATE="2025-01-15"
+# THREAT_SEVERITY="CRITICAL"
+#
+# THREAT_REPO_PATTERNS="example-attack backdoor"
+# THREAT_BRANCH_PATTERNS="malicious-branch"
+#
+# THREAT_MALICIOUS_WORKFLOWS="evil.yml"
+# THREAT_WORKFLOW_PATTERNS="curl.*webhook\.site|base64 -d"
+#
+# THREAT_PACKAGES="@evil/package compromised-lib"
+# THREAT_PACKAGE_VERSIONS="compromised-lib@1.0.0 @evil/package@2.0.0"
+# THREAT_HASHES="de0e25a3e6c1e1e5998b306b7141b3dc4c0088da9d7bb47c1c00c91e6e4f85d6"
+# THREAT_MALICIOUS_SCRIPTS="payload.js backdoor.js"
+# THREAT_PREINSTALL_PATTERNS="curl.*http wget.*http"
+#
+# THREAT_EXFIL_FILES="stolen.json secrets.json"
+#
+#===============================================================================
