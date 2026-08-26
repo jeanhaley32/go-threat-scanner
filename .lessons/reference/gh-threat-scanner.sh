@@ -236,6 +236,49 @@ declare -a g_watched_package_repos=()
 # Threat Intelligence Configuration
 #===============================================================================
 
+# parse_threat_config: Read a threat-patterns config file as DATA.
+#
+# Accepts only `KEY=VALUE` / `KEY="VALUE"` lines whose KEY is a THREAT_* or
+# CUSTOM_WATCHLIST_* uppercase identifier; everything else (unknown keys,
+# function definitions, command lines) is rejected with a warning. Values are
+# assigned literally via `printf -v` and are NEVER evaluated, so a payload like
+# THREAT_NAME="$(rm -rf ~)" is stored as the literal string, not executed.
+parse_threat_config() {
+  local config_file="$1"
+  local line key value lineno=0
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    lineno=$((lineno + 1))
+    # trim leading whitespace; skip blanks and full-line comments
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "${line}" || "${line}" == \#* ]] && continue
+
+    if [[ "${line}" != *=* ]]; then
+      log "WARNING" "Ignoring malformed config line ${lineno} (no '='): ${line}"
+      continue
+    fi
+
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key//[[:space:]]/}"
+
+    if [[ ! "${key}" =~ ^(THREAT_|CUSTOM_WATCHLIST_)[A-Z0-9_]*$ ]]; then
+      log "WARNING" "Rejecting unrecognized config key on line ${lineno}: ${key}"
+      continue
+    fi
+
+    # strip one layer of surrounding quotes; the value is used literally
+    value="${value#"${value%%[![:space:]]*}"}"
+    if [[ "${value}" == \"*\" ]]; then
+      value="${value#\"}"; value="${value%\"}"
+    elif [[ "${value}" == \'*\' ]]; then
+      value="${value#\'}"; value="${value%\'}"
+    fi
+
+    printf -v "${key}" '%s' "${value}"
+  done < "${config_file}"
+}
+
 # load_threat_config: Load and validate threat patterns from config file
 #
 # The config file must define THREAT_* variables. The script is agnostic
@@ -260,8 +303,10 @@ load_threat_config() {
   fi
 
   log "INFO" "Loading threat patterns from: ${config_file}"
-  # shellcheck source=/dev/null  # Dynamic config file path
-  source "${config_file}"
+  # Parse the config as DATA, never `source` it as code. --config is meant to
+  # point at a shared/downloaded watchlist, so sourcing a tampered file would be
+  # silent arbitrary code execution — a self-own for a security scanner.
+  parse_threat_config "${config_file}"
 
   # Validate configuration
   if [[ "${THREAT_ENABLED:-false}" != "true" ]] \
@@ -2325,4 +2370,8 @@ main() {
   fi
 }
 
-main "$@"
+# Only run when executed directly, so tests can source this file to exercise
+# individual functions (e.g. parse_threat_config) without launching a scan.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
