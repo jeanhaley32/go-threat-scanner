@@ -1,0 +1,41 @@
+name: shellcheck
+
+# severity=warning rather than shellcheck's default: at default severity SC2016
+# and similar info-level notes fail correct code, including the single-quoted
+# printf idiom that security fixes in these repos rely on.
+#
+# The lesson fixtures are deliberately excluded and the job SAYS SO in its
+# output rather than skipping them quietly. .lessons/reference/fixtures/ is
+# teaching material and currently carries SC2034 (unused vars) and SC2164
+# (bare cd) on main. Gating on it would turn CI red on main from day one,
+# which would make the review backlog worse rather than better — the whole
+# reason this workflow exists. The scanner itself and its tests are clean at
+# this severity on both main and the open PR, verified before committing.
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          shellcheck --version
+          mapfile -t files < <(git ls-files '*.sh' | grep -v '^\.lessons/reference/fixtures/')
+          mapfile -t skipped < <(git ls-files '*.sh' | grep '^\.lessons/reference/fixtures/' || true)
+          if [ ${#skipped[@]} -gt 0 ]; then
+            echo "NOT CHECKED (lesson fixtures, see workflow comment):"
+            printf '  %s\n' "${skipped[@]}"
+          fi
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no shell scripts to check outside the fixtures"; exit 0
+          fi
+          echo "checking:"
+          printf '  %s\n' "${files[@]}"
+          shellcheck -S warning "${files[@]}"
